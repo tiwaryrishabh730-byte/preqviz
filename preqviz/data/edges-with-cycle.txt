@@ -1,0 +1,141 @@
+# Preqviz 2.0 — prerequisite graph data
+#
+# This is the only file the C program reads.
+#
+#   ELECTIVE <id>                          declares an elective (a starting point for Depth-First Search)
+#   EDGE <from> <to> <essential|helpful>   "<from> needs <to>"
+#
+# Lines starting with # and blank lines are ignored.
+# A node's children are explored in the order its EDGE lines appear in this file.
+# Names, subjects and explanations live in content.js; the C program never needs them.
+
+# ---------------------------------------------------------------
+# Program electives (full topic-level maps, drafted from syllabi)
+# ---------------------------------------------------------------
+
+ELECTIVE nature_inspired_algorithms
+EDGE nature_inspired_algorithms arrays_loops essential
+EDGE nature_inspired_algorithms basic_probability essential
+EDGE nature_inspired_algorithms probability_distributions essential
+EDGE nature_inspired_algorithms trees essential
+EDGE nature_inspired_algorithms weighted_graphs essential
+EDGE nature_inspired_algorithms vectors essential
+EDGE nature_inspired_algorithms local_global_optima essential
+EDGE nature_inspired_algorithms binary_numbers helpful
+
+ELECTIVE git_cuda_programming
+EDGE git_cuda_programming command_line essential
+EDGE git_cuda_programming numpy_arrays essential
+EDGE git_cuda_programming array_indexing essential
+EDGE git_cuda_programming parallelism_threads essential
+EDGE git_cuda_programming memory_hierarchy essential
+EDGE git_cuda_programming matrix_multiplication essential
+EDGE git_cuda_programming vectors helpful
+EDGE git_cuda_programming neural_network_basics helpful
+EDGE git_cuda_programming public_private_keys helpful
+
+ELECTIVE information_theory
+EDGE information_theory logarithms essential
+EDGE information_theory conditional_probability essential
+EDGE information_theory convex_functions essential
+EDGE information_theory gaussian_distribution essential
+EDGE information_theory law_of_large_numbers helpful
+EDGE information_theory vectors_matrices helpful
+EDGE information_theory classification_loss helpful
+EDGE information_theory hypothesis_testing helpful
+EDGE information_theory bayes_theorem helpful
+
+# ---------------------------------------------------------------
+# Topic-to-topic links (shared by every elective that reaches them)
+# ---------------------------------------------------------------
+
+EDGE numpy_arrays arrays_loops essential
+EDGE trees recursion essential
+EDGE weighted_graphs combinatorics helpful
+EDGE local_global_optima derivatives helpful
+EDGE parallelism_threads race_conditions helpful
+EDGE memory_hierarchy cache_memory essential
+EDGE matrix_multiplication dot_product essential
+EDGE conditional_probability basic_probability essential
+EDGE convex_functions second_derivatives essential
+EDGE second_derivatives derivatives essential
+EDGE gaussian_distribution integration essential
+EDGE law_of_large_numbers expectation essential
+EDGE expectation random_variables essential
+EDGE bayes_theorem conditional_probability essential
+
+# ---------------------------------------------------------------
+# Open electives (subject-level estimates from the catalogue;
+# detailed syllabi are released only after selection)
+# ---------------------------------------------------------------
+
+ELECTIVE virtual_augmented_reality
+EDGE virtual_augmented_reality transformations_3d essential
+EDGE virtual_augmented_reality programming_basics essential
+EDGE virtual_augmented_reality graphics_basics helpful
+
+ELECTIVE drone_technology
+EDGE drone_technology programming_basics essential
+EDGE drone_technology flight_physics essential
+EDGE drone_technology control_systems_basics essential
+EDGE drone_technology sensors_electronics helpful
+
+ELECTIVE game_design
+EDGE game_design classes_objects essential
+EDGE game_design data_structures essential
+EDGE game_design vectors_motion helpful
+
+ELECTIVE geographic_information_systems
+EDGE geographic_information_systems coordinate_systems essential
+EDGE geographic_information_systems databases_tables essential
+EDGE geographic_information_systems descriptive_statistics helpful
+EDGE geographic_information_systems spatial_data_structures helpful
+
+ELECTIVE three_d_printing
+EDGE three_d_printing modelling_3d helpful
+
+ELECTIVE five_g_for_everyone
+
+ELECTIVE climate_change
+
+ELECTIVE disaster_management
+
+ELECTIVE electric_vehicle_technology
+EDGE electric_vehicle_technology energy_power_basics helpful
+EDGE electric_vehicle_technology electrical_circuits helpful
+
+ELECTIVE elements_of_automation
+EDGE elements_of_automation programming_basics helpful
+EDGE elements_of_automation electrical_circuits helpful
+
+ELECTIVE engineering_materials
+
+ELECTIVE industrial_ergonomics
+EDGE industrial_ergonomics descriptive_statistics helpful
+
+ELECTIVE interior_design
+
+ELECTIVE renewable_energy_sources
+EDGE renewable_energy_sources energy_power_basics helpful
+
+ELECTIVE research_methodology
+EDGE research_methodology descriptive_statistics helpful
+
+ELECTIVE smart_cities
+EDGE smart_cities descriptive_statistics helpful
+EDGE smart_cities networking_basics helpful
+
+ELECTIVE spreadsheet_decision_making
+
+ELECTIVE scada
+EDGE scada networking_basics essential
+EDGE scada programming_basics helpful
+
+ELECTIVE sustainable_energy_technologies
+EDGE sustainable_energy_technologies energy_power_basics helpful
+
+ELECTIVE wireless_communications
+EDGE wireless_communications networking_basics helpful
+
+# DEMO ONLY: this line creates a cycle (derivatives -> local_global_optima -> derivatives)
+EDGE derivatives local_global_optima essential

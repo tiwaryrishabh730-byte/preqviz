@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preqviz — know what an elective expects before you pick it</title>
+<meta name="description" content="See every prerequisite topic for your electives, in the order to learn them, checked against the subjects you have completed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Geist:wght@400;500;600&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0C11;
+  --surface: #11141B;
+  --inset: #0E1117;
+  --raised: #161A23;
+  --border: #1F2430;
+  --border-strong: #2A3040;
+  --text: #ECEEF3;
+  --text-2: #A3A9B6;
+  --text-3: #8A91A0;
+  --accent: #8B97FF;
+  --accent-ink: #0A0C11;
+  --accent-soft: rgba(139, 151, 255, 0.14);
+  --accent-text: #C3C9FF;
+  --warn: #F2B55A;
+  --warn-soft: rgba(242, 181, 90, 0.14);
+  --ok: #5FD3A6;
+  --display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --body: 'Geist', system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+a { color: #B7BEFF; }
+a:hover { color: #D9DDFF; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
+
+.wrap { max-width: 1440px; margin: 0 auto; padding: 24px 40px 48px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); background: none; border: 0; padding: 0; cursor: pointer; }
+.brand-name { font-family: var(--display); font-weight: 700; font-size: 21px; letter-spacing: -0.02em; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--border-strong); background: transparent; cursor: pointer; font-size: 14px; font-weight: 500; }
+.btn:hover { background: var(--raised); }
+.btn-primary { border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn-primary:hover { background: #A1ABFF; }
+.icon-btn { width: 44px; padding: 0; }
+.chip { display: inline-flex; align-items: center; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border-strong); color: var(--text-2); }
+.chip-accent { border: 0; background: var(--accent-soft); color: var(--accent-text); font-weight: 600; }
+.tag { flex: none; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.tag-covered { background: rgba(139, 151, 255, 0.12); color: var(--accent-text); }
+.tag-revise { background: var(--warn-soft); color: var(--warn); }
+.tag-new, .tag-partial { border: 1px dashed var(--warn); color: var(--warn); }
+
+/* ---------- Welcome ---------- */
+.welcome { max-width: 1240px; margin: 0 auto; padding: 40px 40px 64px; display: flex; flex-direction: column; gap: 48px; }
+.welcome-row { display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; }
+.welcome-copy { flex: 1 1 420px; display: flex; flex-direction: column; gap: 24px; padding-top: 24px; }
+.welcome h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(38px, 5vw, 56px); line-height: 1.04; letter-spacing: -0.03em; }
+.welcome h1 em { font-style: normal; color: var(--accent); }
+.welcome-lede { margin: 0; max-width: 520px; color: var(--text-2); font-size: 17px; }
+.benefits { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.benefits li { display: flex; gap: 12px; align-items: flex-start; }
+.benefits svg { flex: none; margin-top: 2px; }
+.subjects-card { flex: 1 1 400px; max-width: 520px; display: flex; flex-direction: column; gap: 20px; padding: 32px; border-radius: 24px; }
+.subjects-card h2 { margin: 0; font-family: var(--display); font-size: 26px; font-weight: 700; letter-spacing: -0.015em; }
+.subjects-card p { margin: 0; font-size: 14px; color: var(--text-2); }
+.subject-group { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 6px; }
+.subject-group legend { padding: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.subject-grid { display: flex; flex-direction: column; gap: 8px; }
+.subject-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; min-height: 52px; padding: 6px 6px 6px 12px; border-radius: 12px; background: var(--inset); border: 1px solid var(--border); transition: border-color .2s; }
+.subject-row.on { border-color: rgba(139, 151, 255, 0.45); }
+.subject-check { flex: 1 1 180px; display: flex; align-items: center; gap: 10px; min-height: 40px; cursor: pointer; font-size: 14px; }
+.subject-check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); flex: none; }
+.rating { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; background: #0B0D13; border: 1px solid var(--border); transition: opacity .2s; }
+.subject-row:not(.on) .rating { opacity: .35; }
+.rating label { position: relative; cursor: pointer; }
+.rating input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.rating span { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--text-3); }
+.rating input:checked + span { background: #1F2433; color: var(--text); }
+.rating input[value="strong"]:checked + span { background: var(--accent-soft); color: var(--accent-text); }
+.rating input[value="weak"]:checked + span { background: var(--warn-soft); color: var(--warn); }
+.rating input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+.rating input:disabled + span { cursor: not-allowed; }
+.quick-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.form-note { font-size: 13px !important; color: var(--warn) !important; }
+.go-btn { height: 52px; border-radius: 14px; font-size: 16px; }
+.fine-print { font-size: 12px !important; color: var(--text-3) !important; text-align: center; }
+
+/* ---------- Dashboard ---------- */
+.topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid #1C2029; }
+.topbar-left { display: flex; align-items: center; gap: 36px; flex-wrap: wrap; }
+.nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav a { padding: 8px 14px; border-radius: 999px; color: var(--text-2); text-decoration: none; font-weight: 500; font-size: 14px; }
+.nav a[aria-current="page"] { background: var(--raised); color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.search { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; min-width: 260px; background: var(--surface); border: 1px solid #242935; border-radius: 12px; color: var(--text-3); }
+.search input { flex: 1; border: 0; outline: none; background: transparent; color: var(--text); font: inherit; font-size: 14px; min-width: 0; }
+.dot { width: 8px; height: 8px; border-radius: 4px; background: var(--ok); }
+
+.layout { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; margin-top: 24px; }
+.sidebar { flex: 1 1 260px; max-width: 300px; display: flex; flex-direction: column; gap: 20px; }
+.side-head { display: flex; justify-content: space-between; align-items: baseline; }
+.side-head h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.side-head span { font-family: var(--mono); font-size: 12px; color: var(--text-3); }
+.side-list { display: flex; flex-direction: column; gap: 8px; }
+.el-btn { display: flex; flex-direction: column; gap: 10px; width: 100%; padding: 14px 16px; border-radius: 14px; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--border); transition: background-color .25s, border-color .25s, box-shadow .25s; }
+.el-btn.open { flex-direction: row; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--inset); border-color: #1C2029; }
+.el-btn:hover { border-color: var(--border-strong); }
+.el-btn[aria-current="true"] { background: #171C2C; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(139, 151, 255, 0.10); }
+.el-name { font-weight: 600; font-size: 15px; }
+.el-btn.open .el-name { font-weight: 500; font-size: 14px; }
+.el-meta { font-size: 12px; color: var(--text-3); }
+.el-text { display: flex; flex-direction: column; gap: 2px; }
+.el-bar { display: flex; align-items: center; gap: 10px; width: 100%; }
+.bar { flex: 1; height: 4px; border-radius: 2px; background: #232836; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+.frac { font-family: var(--mono); font-size: 12px; color: var(--text-2); }
+.link-btn { background: none; border: 0; padding: 8px 16px; color: #B7BEFF; font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; }
+.link-btn:hover { color: #D9DDFF; }
+.empty-search { padding: 12px 16px; font-size: 13px; color: var(--text-3); }
+
+.main { flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.course { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; padding: 28px; }
+.course-info { flex: 1 1 360px; display: flex; flex-direction: column; gap: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.course h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1.15; letter-spacing: -0.02em; }
+.course p { margin: 0; color: var(--text-2); max-width: 620px; }
+.notice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--warn); color: var(--warn); font-size: 13px; max-width: 620px; }
+.notice svg { flex: none; margin-top: 2px; }
+.readiness { flex: 0 1 300px; display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 16px; background: var(--inset); border: 1px solid #1C2029; }
+.score { display: flex; align-items: baseline; gap: 8px; }
+.score b { font-family: var(--display); font-weight: 700; font-size: 40px; line-height: 1; }
+.score b span { color: #6E7585; }
+.score small { font-size: 13px; color: var(--text-2); }
+.segbar { display: flex; gap: 3px; height: 8px; }
+.segbar span { border-radius: 4px; transition: flex-grow .4s; }
+.seg-covered { background: var(--accent); }
+.seg-revise { background: var(--warn); }
+.seg-new { border: 1px dashed var(--warn); }
+.legend-line { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--text-2); }
+
+.toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.tabs { display: inline-flex; padding: 4px; gap: 4px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+.tabs button { height: 36px; padding: 0 16px; border-radius: 9px; border: 0; background: transparent; color: var(--text-2); font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color .2s, color .2s; }
+.tabs button[aria-selected="true"] { background: #1F2433; color: var(--text); font-weight: 600; }
+
+.panel { display: flex; flex-direction: column; gap: 16px; padding: 24px; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.panel-head h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.panel-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.status-chip { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(139, 151, 255, 0.12); color: var(--accent-text); }
+.status-chip::before { content: ''; width: 6px; height: 6px; border-radius: 3px; background: var(--accent); }
+.replay-controls { display: flex; gap: 8px; }
+
+.graph-scroll { overflow-x: auto; border-radius: 16px; }
+.graph { position: relative; margin: 0 auto; border-radius: 16px; background-color: var(--inset); background-image: radial-gradient(#202533 1px, transparent 1px); background-size: 20px 20px; }
+.seg { position: absolute; background: #3A4256; transition: background-color .35s; }
+.seg.head { clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.graph.replaying .seg { background: #262B38; }
+.graph.replaying .seg.on { background: var(--accent); z-index: 1; }
+.node { position: absolute; display: flex; align-items: center; padding: 8px 14px; border-radius: 12px; text-align: left; font-size: 14px; line-height: 18px; cursor: pointer; z-index: 2;
+  transition: background-color .35s, border-color .35s, box-shadow .35s, color .35s; }
+.node small { display: block; font-size: 12px; transition: color .35s; }
+.node.covered { background: #151A27; border: 1px solid #2E3550; color: var(--text); }
+.node.covered small { color: var(--text-2); }
+.node.revise { background: #151A27; border: 1px solid var(--warn); color: var(--text); }
+.node.revise small, .node.new small { color: var(--warn); }
+.node.new { background: var(--surface); border: 1px dashed var(--warn); color: #C9CDD6; }
+.node.selected { box-shadow: 0 0 0 3px rgba(236, 238, 243, 0.22); }
+.graph.replaying .node { background: #0F1218; border: 1px solid #232835; color: var(--text-3); }
+.graph.replaying .node small { color: #6E7585; }
+.graph.replaying .node.visited { background: #161B2B; border: 1px solid rgba(139, 151, 255, 0.5); color: var(--text); }
+.graph.replaying .node.visited small { color: var(--text-2); }
+.graph.replaying .node.current { background: #1A2036; border: 2px solid var(--accent); box-shadow: 0 0 0 6px rgba(139, 151, 255, 0.14), 0 0 32px rgba(139, 151, 255, 0.25); color: var(--text); }
+.graph.replaying .node.current small { color: var(--accent-text); }
+.root-node { position: absolute; display: flex; align-items: center; padding: 10px 14px; border-radius: 14px; border: 0; background: var(--accent); color: var(--accent-ink); font-size: 14px; line-height: 18px; text-align: left; cursor: pointer; z-index: 2; }
+.root-node small { display: block; font-size: 12px; color: #262B4D; }
+.badge { position: absolute; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent-ink); background: var(--accent); border: 2px solid var(--inset); z-index: 3; opacity: 0; transform: scale(.6); transition: opacity .25s, transform .25s; pointer-events: none; }
+.graph.replaying .badge.show { opacity: 1; transform: scale(1); }
+.graph.replaying .badge.current { background: var(--text); border-color: var(--accent); }
+.graph-empty { padding: 48px 24px; text-align: center; color: var(--text-2); border-radius: 16px; background: var(--inset); }
+.graph-empty b { display: block; font-family: var(--display); font-size: 22px; color: var(--text); margin-bottom: 6px; }
+
+.legend { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: var(--text-2); }
+.legend-items { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.legend-items span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { width: 14px; height: 10px; border-radius: 3px; }
+
+.detail { display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; }
+.detail-head { flex: 1 1 220px; display: flex; flex-direction: column; gap: 4px; }
+.detail-head h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+.detail dl { flex: 3 1 480px; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; font-size: 14px; }
+.detail dt { font-size: 12px; color: var(--text-3); }
+.detail dd { margin: 2px 0 0; }
+
+.list-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.list-card { display: flex; flex-direction: column; padding: 20px 22px; border-radius: 18px; }
+.list-card h3 { margin: 0 0 6px; display: flex; justify-content: space-between; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.list-row { display: flex; align-items: center; gap: 12px; min-height: 44px; border-top: 1px solid #1A1E28; }
+.list-row span:first-child { flex: 1; }
+.kind { font-size: 12px; font-weight: 600; }
+.kind-essential { color: var(--accent-text); }
+.kind-helpful { color: var(--text-2); }
+
+.order { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.order li { display: flex; align-items: center; gap: 14px; min-height: 52px; border-bottom: 1px solid #1A1E28; }
+.order .n { width: 24px; font-family: var(--mono); font-size: 13px; color: var(--text-3); }
+.order .t { flex: 1; display: flex; flex-direction: column; }
+.order .t small { font-size: 12px; color: var(--text-3); }
+
+.about { display: flex; flex-direction: column; gap: 28px; margin-top: 32px; max-width: 1180px; }
+.about-head { display: flex; flex-direction: column; gap: 12px; max-width: 820px; }
+.about-head h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(32px, 4vw, 44px); line-height: 1.1; letter-spacing: -0.025em; }
+.about-head p { margin: 0; color: var(--text-2); font-size: 17px; }
+.about-h2 { margin: 8px 0 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.about-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.about-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.about-card { display: flex; flex-direction: column; gap: 10px; padding: 24px; }
+.about-card h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.about-card p { margin: 0; color: var(--text-2); font-size: 14px; }
+.about-num { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+.about-legend { display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: var(--text-2); }
+.about-legend > span { display: flex; align-items: center; gap: 12px; }
+.about-legend .tag, .about-legend .kind { min-width: 92px; text-align: center; }
+.about-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--text-2); }
+.footnote { margin: 0; padding: 0 4px; font-size: 12px; color: var(--text-3); }
+.alert { padding: 16px 20px; border-radius: 14px; border: 1px solid var(--warn); background: var(--warn-soft); color: var(--warn); font-size: 14px; }
+
+@media (max-width: 760px) {
+  .wrap, .welcome { padding-left: 16px; padding-right: 16px; }
+  .sidebar { max-width: none; }
+  .search { min-width: 0; flex: 1 1 100%; }
+  .subject-grid, .list-grid, .order, .detail dl, .about-steps, .about-grid { grid-template-columns: minmax(0, 1fr); }
+  .course { padding: 20px; }
+  .subjects-card { padding: 22px 18px; }
+  .panel, .detail { padding: 18px; }
+  .readiness { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= WELCOME ======================= -->
+<section id="welcome" class="welcome" aria-labelledby="welcome-title" hidden>
+  <div class="brand" aria-hidden="true">
+    <svg width="32" height="32" viewBox="0 0 28 28"><rect x="0.5" y="0.5" width="27" height="27" rx="8" fill="#151925" stroke="#2A3040"/><path d="M8 19 L14 9 L20 19" fill="none" stroke="#8B97FF" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="19" r="2.4" fill="#ECEEF3"/><circle cx="14" cy="9" r="2.4" fill="#8B97FF"/><circle cx="20" cy="19" r="2.4" fill="#ECEEF3"/></svg>
+    <span class="brand-name">Preqviz</span>
+  </div>
+  <div class="welcome-row">
+    <div class="welcome-copy">
+      <span class="eyebrow">Bachelor of Technology, Artificial Intelligence · Semester 4 electives</span>
+      <h1 id="welcome-title">See what every elective expects — <em>before you pick it.</em></h1>
+      <p class="welcome-lede">Preqviz maps each elective to the exact topics it builds on, then checks them against the subjects you have already completed.</p>
+      <ul class="benefits">
+        <li><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#8B97FF" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="12" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 6.5 L15.5 11.5"/><path d="M8.5 17.5 L15.5 12.5"/></svg><span>Every prerequisite down to the topic — including the hidden ones behind the obvious ones.</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#8B97FF" stroke-width="2" stroke-linecap="round"><path d="M8 6 H20"/><path d="M8 12 H20"/><path d="M8 18 H20"/><path d="M4 6 H4.01"/><path d="M4 12 H4.01"/><path d="M4 18 H4.01"/></svg><span>A study order that never puts a topic before the things it depends on.</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#8B97FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17 L19 7"/></svg><span>Readiness checked against what you have actually studied, not a guess.</span></li>
+      </ul>
+    </div>
+    <form id="subjects-form" class="card subjects-card" aria-labelledby="subjects-title">
+      <div>
+        <h2 id="subjects-title">Which subjects have you completed?</h2>
+        <p>Tick each subject you have completed, then rate how well you know it. Every readiness score is worked out from your answers.</p>
+      </div>
+      <div class="quick-row">
+        <button type="button" class="btn" id="quick-btn">I have completed Semesters 1 to 3</button>
+        <button type="button" class="link-btn" id="untick-btn">Clear all</button>
+      </div>
+      <div id="subject-groups" style="display:flex;flex-direction:column;gap:18px"></div>
+      <button type="submit" class="btn btn-primary go-btn">See my electives
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"/><path d="M13 6 L19 12 L13 18"/></svg>
+      </button>
+      <p class="form-note" id="form-note" role="alert" hidden>Tick at least one subject, or press “I have completed Semesters 1 to 3”.</p>
+      <p class="fine-print">No account needed — your answers are saved on this device only.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ======================= DASHBOARD ======================= -->
+<div id="dashboard" class="wrap" hidden>
+  <header class="topbar">
+    <div class="topbar-left">
+      <button type="button" class="brand" id="home-btn" aria-label="Preqviz — change completed subjects">
+        <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="0.5" y="0.5" width="27" height="27" rx="8" fill="#151925" stroke="#2A3040"/><path d="M8 19 L14 9 L20 19" fill="none" stroke="#8B97FF" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="19" r="2.4" fill="#ECEEF3"/><circle cx="14" cy="9" r="2.4" fill="#8B97FF"/><circle cx="20" cy="19" r="2.4" fill="#ECEEF3"/></svg>
+        <span class="brand-name">Preqviz</span>
+      </button>
+      <nav class="nav" aria-label="Main">
+        <a href="#electives" id="nav-electives" aria-current="page">Electives</a>
+        <a href="#about" id="nav-about">About</a>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <label class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20 L16.5 16.5"/></svg>
+        <span class="sr">Search electives and topics</span>
+        <input type="search" id="search" placeholder="Search an elective or a topic" autocomplete="off">
+      </label>
+      <button type="button" class="btn" id="edit-btn"><span class="dot" aria-hidden="true"></span><span id="done-label">Subjects completed</span> · Edit</button>
+    </div>
+  </header>
+
+  <div id="data-alert" class="alert" role="alert" hidden style="margin-top:20px"></div>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Electives">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="side-head"><h2>Program electives</h2><span id="program-count"></span></div>
+        <div class="side-list" id="program-list"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="side-head"><h2>Open electives</h2><span id="open-count"></span></div>
+        <div class="side-list" id="open-list"></div>
+        <button type="button" class="link-btn" id="more-btn" aria-expanded="false"></button>
+      </div>
+    </aside>
+
+    <main class="main" id="main">
+      <section class="card course" aria-labelledby="course-title">
+        <div class="course-info">
+          <div class="chips" id="course-chips"></div>
+          <h1 id="course-title"></h1>
+          <p id="course-desc"></p>
+          <p class="notice" id="partial-notice" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8 V12.5"/><path d="M12 16 H12.01"/></svg>
+            <span>Estimated from the catalogue description. The detailed syllabus is released after selection, so this map stays at subject level.</span>
+          </p>
+        </div>
+        <div class="readiness" aria-live="polite">
+          <span style="font-size:13px;color:var(--text-2)">Your readiness</span>
+          <span class="score"><b id="score"></b><small id="score-label">topics studied</small></span>
+          <span class="segbar" aria-hidden="true"><span class="seg-covered" id="seg-covered"></span><span class="seg-revise" id="seg-revise"></span><span class="seg-new" id="seg-new"></span></span>
+          <span class="legend-line" id="score-legend"></span>
+        </div>
+      </section>
+
+      <div class="toolbar">
+        <div class="tabs" role="tablist" aria-label="View">
+          <button type="button" role="tab" id="tab-graph" aria-controls="view-graph" aria-selected="true">Graph</button>
+          <button type="button" role="tab" id="tab-list" aria-controls="view-list" aria-selected="false">List</button>
+          <button type="button" role="tab" id="tab-order" aria-controls="view-order" aria-selected="false">Study order</button>
+        </div>
+        <button type="button" class="btn btn-primary" id="replay-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5 L19 12 L7 19.5 Z"/></svg><span id="replay-label">Replay traversal</span>
+        </button>
+      </div>
+
+      <div id="view-graph" role="tabpanel" aria-labelledby="tab-graph" style="display:flex;flex-direction:column;gap:20px">
+        <section class="card panel" aria-labelledby="graph-title">
+          <div class="panel-head">
+            <div class="panel-title">
+              <h2 id="graph-title">Prerequisite graph</h2>
+              <span class="status-chip" id="replay-status" aria-live="polite"></span>
+            </div>
+            <div class="replay-controls">
+              <button type="button" class="btn icon-btn" id="pause-btn" aria-label="Play replay"></button>
+              <button type="button" class="btn icon-btn" id="skip-btn" aria-label="Skip to the end">
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5 L14 12 L5 19 Z"/><path d="M18 5 V19"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="graph-scroll"><div class="graph" id="graph"></div></div>
+          <div class="legend">
+            <div class="legend-items" id="legend-idle">
+              <span><span class="sw" style="background:#151A27;border:1px solid #3A4466"></span>Covered</span>
+              <span><span class="sw" style="border:1px solid var(--warn)"></span>To revise</span>
+              <span><span class="sw" style="border:1px dashed var(--warn)"></span>New to you</span>
+            </div>
+            <div class="legend-items" id="legend-replay" hidden>
+              <span><span class="sw" style="background:#161B2B;border:1px solid var(--accent)"></span>Visited</span>
+              <span><span class="sw" style="border:2px solid var(--accent)"></span>Visiting now</span>
+              <span><span class="sw" style="border:1px solid #2A2F3B"></span>Not yet visited</span>
+            </div>
+            <span>Click any topic for details</span>
+          </div>
+        </section>
+
+        <section class="card detail" id="detail" aria-labelledby="detail-title">
+          <div class="detail-head">
+            <span class="eyebrow">Selected topic</span>
+            <h2 id="detail-title"></h2>
+            <span class="kind" id="detail-kind"></span>
+          </div>
+          <dl>
+            <div><dt>Why it is needed</dt><dd id="detail-why"></dd></div>
+            <div><dt>Used in</dt><dd id="detail-used"></dd></div>
+            <div><dt>Builds on</dt><dd id="detail-builds"></dd></div>
+            <div><dt>Your status</dt><dd id="detail-status"></dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <div id="view-list" role="tabpanel" aria-labelledby="tab-list" hidden>
+        <div class="list-grid" id="list-grid"></div>
+      </div>
+
+      <div id="view-order" role="tabpanel" aria-labelledby="tab-order" hidden>
+        <section class="card panel" aria-labelledby="order-title">
+          <div>
+            <h2 id="order-title" style="margin:0;font-size:16px;font-weight:600">Study order</h2>
+            <p style="margin:4px 0 0;font-size:13px;color:var(--text-2)">The order in which Depth-First Search finishes each topic. Revise top to bottom — every topic comes after everything it depends on.</p>
+          </div>
+          <ol class="order" id="order-list"></ol>
+        </section>
+      </div>
+
+      <p class="footnote">Preqviz is a student project. Maps for program electives are drafted from the official syllabi; open-elective syllabi are released after selection, so those maps are estimates. Spotted a mistake? Tell the maintainer.</p>
+    </main>
+  </div>
+
+  <!-- ======================= ABOUT ======================= -->
+  <section id="about-view" class="about" aria-labelledby="about-title" hidden>
+    <div class="about-head">
+      <span class="eyebrow">About</span>
+      <h1 id="about-title">Know what an elective expects — before you pick it.</h1>
+      <p>Preqviz maps every Semester 4 elective for Bachelor of Technology, Artificial Intelligence students to the topics it builds on, then checks them against the subjects you have completed.</p>
+    </div>
+
+    <h2 class="about-h2">How it works</h2>
+    <div class="about-steps">
+      <div class="card about-card"><span class="about-num">01</span><h3>Prerequisites form a graph</h3><p>Every elective and topic is a node; an arrow means “needs”. A topic shared by several electives is stored once.</p></div>
+      <div class="card about-card"><span class="about-num">02</span><h3>A C program explores it</h3><p>One Depth-First Search per elective finds every prerequisite, gives the study order, and rejects data with a cycle.</p></div>
+      <div class="card about-card"><span class="about-num">03</span><h3>This page draws the results</h3><p>The page has no graph logic of its own. It shows what the C program computed, and checks it against your subjects.</p></div>
+    </div>
+
+    <div class="about-grid">
+      <div class="card about-card">
+        <h2 class="about-h2" style="margin:0">What the labels mean</h2>
+        <div class="about-legend">
+          <span><span class="tag tag-covered">Covered</span>A subject you have completed teaches it.</span>
+          <span><span class="tag tag-revise">Revise</span>You rated the subject weak, or met the topic only briefly.</span>
+          <span><span class="tag tag-new">New to you</span>It comes from a subject you have not studied.</span>
+          <span><span class="kind kind-essential">Essential</span>The elective cannot be followed without it.</span>
+          <span><span class="kind kind-helpful">Helpful</span>It speeds things up but can be picked up along the way.</span>
+          <span><span class="tag tag-partial">Partial</span>An open elective mapped from its short catalogue description.</span>
+        </div>
+      </div>
+      <div class="card about-card">
+        <h2 class="about-h2" style="margin:0">Where the data comes from</h2>
+        <ul class="about-list">
+          <li>Program electives: the official syllabi for Academic Year 2026–27.</li>
+          <li>Open electives: the even-semester catalogue. Detailed syllabi are released after selection, so these are estimates.</li>
+          <li>Maps have not yet been reviewed by faculty. Use them as a guide, not a rule.</li>
+        </ul>
+        <h2 class="about-h2" style="margin:8px 0 0">Your data</h2>
+        <p style="margin:0;color:var(--text-2)">No account. The subjects you tick are saved only in this browser.</p>
+        <button type="button" class="btn" id="clear-btn" style="align-self:flex-start">Clear my data and start again</button>
+      </div>
+    </div>
+
+    <p class="footnote">Built by Rohan, Bachelor of Technology, Artificial Intelligence, NMIMS MPSTME, as a Data Structures and Algorithms mini project. Spotted a mistake in a map? Tell the maintainer.</p>
+  </section>
+</div>
+
+<!-- Data: content.js is written by hand; results.js is generated by the C program from edges.txt -->
+<script src="data/content.js"></script>
+<script src="data/results.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* =====================================================================
+     DATA FROM THE C PROGRAM
+     All graph work (Depth-First Search, visit order, study order, layout,
+     cycle detection) happens in C. This page only reads its results.
+     ===================================================================== */
+  var CONTENT = window.PREQVIZ_CONTENT;
+  var RESULTS = window.PREQVIZ_RESULTS;
+
+  var STORE_KEY = 'preqviz.subjects.v2';
+  var OLD_STORE_KEY = 'preqviz.completed.v1';
+  var STEP_MS = 700;
+  var COL0_X = 24, COL0_W = 168, COL_X = 248, COL_W = 212, COL_GAP = 64;
+  var CARD_H = 52, ROW_GAP = 72, PAD = 28;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+
+  var state = {
+    done: {}, elective: 'information_theory', tab: 'graph',
+    step: null, playing: false, selected: null, showAllOpen: false, query: ''
+  };
+  var timer = null;
+
+  /* ---------- Storage (ticks stay on this device) ---------- */
+  var RATINGS = ['strong', 'okay', 'weak'];
+  // state.done[subject] is 'strong', 'okay' or 'weak' when completed; absent otherwise.
+  function loadDone() {
+    try {
+      var raw = window.localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw), clean = {};
+        Object.keys(parsed).forEach(function (k) {
+          if (CONTENT.subjects[k] && RATINGS.indexOf(parsed[k]) >= 0) clean[k] = parsed[k];
+        });
+        if (Object.keys(clean).length) return { done: clean, saved: true };
+      }
+      var old = window.localStorage.getItem(OLD_STORE_KEY);   // earlier version: true/false ticks
+      if (old) {
+        var prev = JSON.parse(old), moved = {};
+        Object.keys(prev).forEach(function (k) { if (prev[k] && CONTENT.subjects[k]) moved[k] = 'okay'; });
+        if (Object.keys(moved).length) return { done: moved, saved: true };
+      }
+    } catch (err) { /* storage unavailable or unreadable: start fresh */ }
+    return { done: {}, saved: false };
+  }
+  function saveDone() {
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify(state.done)); } catch (err) { /* ignore */ }
+  }
+
+  /* ---------- Helpers over the C results ---------- */
+  function result(id) { return RESULTS && RESULTS.electives ? RESULTS.electives[id] : null; }
+  function topicsOf(id) { var r = result(id); return r ? r.visit : []; }
+  function strengthOf(id, topic) {
+    var r = result(id); if (!r) return 'essential';
+    for (var i = 0; i < r.edges.length; i++) if (r.edges[i][1] === topic) return r.edges[i][2];
+    return 'essential';
+  }
+  function childrenOf(id, topic) {
+    var r = result(id); if (!r) return [];
+    return r.edges.filter(function (e) { return e[0] === topic; }).map(function (e) { return e[1]; });
+  }
+  function topic(id) { return CONTENT.topics[id] || { label: id, subject: '' }; }
+  function subject(id) { return CONTENT.subjects[id] || { name: id, semester: 0, short: id, tickable: false }; }
+
+  function status(topicId) {
+    var t = topic(topicId), rating = state.done[t.subject];
+    if (!rating) return 'new';
+    if (rating === 'weak') return 'revise';
+    if (rating === 'strong') return 'covered';
+    return t.revise ? 'revise' : 'covered';      // met only briefly in that subject
+  }
+  function readiness(id) {
+    var list = topicsOf(id), studied = 0, revise = 0;
+    list.forEach(function (t) { var s = status(t); if (s !== 'new') studied++; if (s === 'revise') revise++; });
+    return { total: list.length, studied: studied, revise: revise, fresh: list.length - studied };
+  }
+  function subjectLine(topicId) {
+    var t = topic(topicId), s = subject(t.subject), st = status(topicId);
+    if (st === 'new') return 'Not in your curriculum';
+    if (st === 'revise') return s.short + (state.done[t.subject] === 'weak' ? ' · rated weak' : ' · revise');
+    return s.short;
+  }
+
+  /* ---------- Welcome ---------- */
+  function renderWelcome() {
+    var html = CONTENT.welcomeGroups.map(function (g) {
+      return '<fieldset class="subject-group"><legend>' + esc(g.label) + '</legend><div class="subject-grid">' +
+        g.subjects.map(function (sid) {
+          var rating = state.done[sid], name = esc(subject(sid).name);
+          return '<div class="subject-row' + (rating ? ' on' : '') + '" data-sid="' + esc(sid) + '">' +
+            '<label class="subject-check"><input type="checkbox" name="subject" value="' + esc(sid) + '"' + (rating ? ' checked' : '') + '><span>' + name + '</span></label>' +
+            '<div class="rating" role="radiogroup" aria-label="How well do you know ' + name + '?">' +
+            RATINGS.map(function (v) {
+              return '<label><input type="radio" name="rate-' + esc(sid) + '" value="' + v + '"' +
+                ((rating || 'okay') === v ? ' checked' : '') + (rating ? '' : ' disabled') + '><span>' + v.charAt(0).toUpperCase() + v.slice(1) + '</span></label>';
+            }).join('') + '</div></div>';
+        }).join('') + '</div></fieldset>';
+    }).join('');
+    $('subject-groups').innerHTML = html;
+    $('form-note').hidden = true;
+  }
+  function setRow(row, on) {
+    row.classList.toggle('on', on);
+    row.querySelector('input[type="checkbox"]').checked = on;
+    row.querySelectorAll('input[type="radio"]').forEach(function (r) { r.disabled = !on; });
+  }
+  function showScreen(name) {
+    $('welcome').hidden = name !== 'welcome';
+    $('dashboard').hidden = name !== 'dashboard';
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- Sidebar ---------- */
+  function electiveIds(type) {
+    var ids = Object.keys(CONTENT.electives).filter(function (id) { return CONTENT.electives[id].type === type; });
+    if (type === 'open') {
+      var featured = CONTENT.featuredOpen.filter(function (id) { return ids.indexOf(id) >= 0; });
+      var rest = ids.filter(function (id) { return featured.indexOf(id) < 0; })
+        .sort(function (a, b) { return CONTENT.electives[a].name.localeCompare(CONTENT.electives[b].name); });
+      return featured.concat(rest);
+    }
+    return ids;
+  }
+  function matches(id) {
+    var q = state.query.trim().toLowerCase();
+    if (!q) return true;
+    var e = CONTENT.electives[id];
+    if (e.name.toLowerCase().indexOf(q) >= 0 || e.dept.toLowerCase().indexOf(q) >= 0) return true;
+    return topicsOf(id).some(function (t) { return topic(t).label.toLowerCase().indexOf(q) >= 0; });
+  }
+  function electiveButton(id) {
+    var e = CONTENT.electives[id], r = readiness(id), on = id === state.elective;
+    var pct = r.total ? Math.round(r.studied / r.total * 100) : 100;
+    var frac = r.total ? r.studied + '/' + r.total : 'none';
+    if (e.type === 'program') {
+      return '<button type="button" class="el-btn" data-el="' + id + '" aria-current="' + on + '">' +
+        '<span class="el-text"><span class="el-name">' + esc(e.name) + '</span><span class="el-meta">' + e.credits + ' credits · ' + esc(e.hours) + '</span></span>' +
+        '<span class="el-bar"><span class="bar"><span style="width:' + pct + '%"></span></span><span class="frac">' + frac + '</span></span></button>';
+    }
+    return '<button type="button" class="el-btn open" data-el="' + id + '" aria-current="' + on + '">' +
+      '<span class="el-text"><span class="el-name">' + esc(e.name) + '</span><span class="el-meta">' + esc(e.dept) + (r.total ? ' · ' + frac + ' studied' : ' · no prerequisites') + '</span></span>' +
+      '<span class="tag tag-partial">Partial</span></button>';
+  }
+  function renderSidebar() {
+    var program = electiveIds('program').filter(matches);
+    var open = electiveIds('open').filter(matches);
+    var searching = state.query.trim() !== '';
+    var shownOpen = (state.showAllOpen || searching) ? open : open.slice(0, 4);
+    $('program-count').textContent = program.length;
+    $('open-count').textContent = open.length;
+    $('program-list').innerHTML = program.length ? program.map(electiveButton).join('') : '<div class="empty-search">No program elective matches.</div>';
+    $('open-list').innerHTML = shownOpen.length ? shownOpen.map(electiveButton).join('') : '<div class="empty-search">No open elective matches.</div>';
+    var more = $('more-btn');
+    more.hidden = searching || open.length <= 4;
+    more.textContent = state.showAllOpen ? 'Show fewer open electives' : 'Show ' + (open.length - 4) + ' more open electives';
+    more.setAttribute('aria-expanded', String(state.showAllOpen));
+  }
+
+  /* ---------- Course header and readiness ---------- */
+  function renderCourse() {
+    var id = state.elective, e = CONTENT.electives[id], r = readiness(id);
+    $('course-chips').innerHTML =
+      '<span class="chip chip-accent">' + (e.type === 'program' ? 'Program elective' : 'Open elective') + '</span>' +
+      '<span class="chip">' + e.credits + ' credits</span><span class="chip">' + esc(e.hours) + '</span>' +
+      (e.type === 'open' ? '<span class="chip">Offered by ' + esc(e.dept) + '</span>' : '');
+    $('course-title').textContent = e.name;
+    $('course-desc').textContent = e.desc;
+    $('partial-notice').hidden = e.type !== 'open';
+    if (r.total) {
+      $('score').innerHTML = r.studied + '<span>/' + r.total + '</span>';
+      $('score-label').textContent = 'topics studied';
+      $('score-legend').innerHTML = '<span>' + (r.studied - r.revise) + ' ready</span><span style="color:var(--warn)">' + r.revise + ' to revise</span><span>' + r.fresh + ' new to you</span>';
+    } else {
+      $('score').innerHTML = '—';
+      $('score-label').textContent = 'no prerequisites';
+      $('score-legend').innerHTML = '<span>Open to everyone — no background assumed.</span>';
+    }
+    var parts = [['seg-covered', r.studied - r.revise], ['seg-revise', r.revise], ['seg-new', r.fresh]];
+    parts.forEach(function (p) { var el = $(p[0]); el.style.flex = String(p[1]); el.style.display = p[1] > 0 ? '' : 'none'; });
+    $('seg-covered').parentNode.style.display = r.total ? '' : 'none';
+    var keys = Object.keys(state.done).filter(function (k) { return state.done[k]; });
+    var weak = keys.filter(function (k) { return state.done[k] === 'weak'; }).length;
+    $('done-label').textContent = keys.length
+      ? 'Based on ' + keys.length + (keys.length === 1 ? ' subject' : ' subjects') + (weak ? ' · ' + weak + ' weak' : '')
+      : 'No subjects ticked';
+  }
+
+  /* ---------- Tabs ---------- */
+  function renderTabs() {
+    ['graph', 'list', 'order'].forEach(function (t) {
+      $('tab-' + t).setAttribute('aria-selected', String(state.tab === t));
+      $('view-' + t).hidden = state.tab !== t;
+    });
+  }
+
+  /* ---------- Graph (positions come from C) ---------- */
+  function colX(depth) { return depth === 0 ? COL0_X : COL_X + (depth - 1) * (COL_W + COL_GAP); }
+  function colW(depth) { return depth === 0 ? COL0_W : COL_W; }
+
+  function buildGraph() {
+    var id = state.elective, e = CONTENT.electives[id], r = result(id), g = $('graph');
+    if (!r || !r.visit.length) {
+      g.parentNode.style.display = 'none';
+      var empty = $('graph-empty');
+      if (!empty) {
+        empty = document.createElement('div');
+        empty.id = 'graph-empty';
+        empty.className = 'graph-empty';
+        g.parentNode.parentNode.insertBefore(empty, g.parentNode);
+      }
+      empty.hidden = false;
+      empty.innerHTML = r
+        ? '<b>No significant prerequisites</b>This course assumes no background beyond general engineering. Anyone can take it.'
+        : '<b>No graph results yet</b>See the message at the top of the page.';
+      $('detail').hidden = true;
+      return;
+    }
+    g.parentNode.style.display = '';
+    if ($('graph-empty')) $('graph-empty').hidden = true;
+    $('detail').hidden = false;
+
+    var maxDepth = 0;
+    r.visit.forEach(function (t) { if (r.layout[t][0] > maxDepth) maxDepth = r.layout[t][0]; });
+    var width = colX(maxDepth) + colW(maxDepth) + 24;
+    var height = PAD * 2 + r.rows * ROW_GAP - (ROW_GAP - CARD_H);
+    var cy = function (row) { return PAD + row * ROW_GAP + CARD_H / 2; };
+    var rootCy = PAD + (r.rows - 1) * ROW_GAP / 2 + CARD_H / 2;
+    var html = [];
+
+    function seg(target, x, y, w, h, extra) {
+      html.push('<div class="seg' + (extra || '') + '" data-to="' + target + '" style="left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px"></div>');
+    }
+    function hLine(target, x1, x2, y) { seg(target, Math.min(x1, x2), y - 1, Math.abs(x2 - x1), 2); }
+    function vLine(target, x, y1, y2) { seg(target, x - 1, Math.min(y1, y2), 2, Math.abs(y2 - y1) + 2); }
+    function head(target, x, y) { seg(target, x - 8, y - 5, 8, 10, ' head'); }
+
+    var trunkX = Math.round((COL0_X + COL0_W + COL_X) / 2);
+    var firstLevel = r.edges.filter(function (ed) { return ed[0] === id; });
+    if (firstLevel.length) hLine(firstLevel[0][1], COL0_X + COL0_W, trunkX, rootCy);
+    r.edges.forEach(function (ed) {
+      var from = ed[0], to = ed[1], q = r.layout[to], x2 = colX(q[0]), y2 = cy(q[1]);
+      if (from === id) {
+        vLine(to, trunkX, rootCy, y2);
+        hLine(to, trunkX, x2 - 8, y2);
+      } else {
+        var p = r.layout[from], x1 = colX(p[0]) + colW(p[0]), y1 = cy(p[1]);
+        if (y1 === y2) { hLine(to, x1, x2 - 8, y1); }
+        else { var mid = Math.round((x1 + x2) / 2); hLine(to, x1, mid, y1); vLine(to, mid, y1, y2); hLine(to, mid, x2 - 8, y2); }
+      }
+      head(to, x2, y2);
+    });
+
+    html.push('<button type="button" class="root-node" id="root-node" style="left:' + COL0_X + 'px;top:' + (rootCy - 36) + 'px;width:' + COL0_W + 'px;height:72px" aria-label="Replay the traversal from ' + esc(e.name) + '"><span><b>' + esc(e.short) + '</b><small>' + (e.type === 'program' ? 'Program elective' : 'Open elective') + ' · start</small></span></button>');
+
+    r.visit.forEach(function (t, i) {
+      var pos = r.layout[t], x = colX(pos[0]), y = PAD + pos[1] * ROW_GAP, tp = topic(t);
+      var kind = strengthOf(id, t) === 'essential' ? 'Essential' : 'Helpful';
+      html.push('<button type="button" class="node" data-topic="' + t + '" data-index="' + i + '" style="left:' + x + 'px;top:' + y + 'px;width:' + COL_W + 'px;height:' + CARD_H + 'px" aria-label="' + esc(tp.label + ', ' + kind) + '"><span><b>' + esc(tp.label) + '</b><small></small></span></button>');
+      html.push('<div class="badge" data-badge="' + i + '" style="left:' + (x - 10) + 'px;top:' + (y - 10) + 'px">' + (i + 1) + '</div>');
+    });
+
+    g.style.width = width + 'px';
+    g.style.height = height + 'px';
+    g.innerHTML = html.join('');
+  }
+
+  function paintGraph() {
+    var id = state.elective, r = result(id), g = $('graph');
+    if (!r || !r.visit.length) return;
+    var replaying = state.step !== null;
+    var n = r.visit.length;
+    var index = {};
+    r.visit.forEach(function (t, i) { index[t] = i; });
+    g.classList.toggle('replaying', replaying);
+    var sel = state.selected && index[state.selected] !== undefined ? state.selected : r.visit[0];
+
+    g.querySelectorAll('.node').forEach(function (el) {
+      var t = el.getAttribute('data-topic'), i = index[t], st = status(t);
+      var visited = replaying && i < state.step;
+      var current = replaying && i === state.step - 1 && (state.playing || state.step < n);
+      el.className = 'node ' + st + (visited ? ' visited' : '') + (current ? ' current' : '') + (t === sel && !current ? ' selected' : '');
+      el.querySelector('small').textContent = current ? 'visiting now' : subjectLine(t);
+    });
+    g.querySelectorAll('.badge').forEach(function (el) {
+      var i = Number(el.getAttribute('data-badge'));
+      var visited = replaying && i < state.step;
+      var current = replaying && i === state.step - 1 && (state.playing || state.step < n);
+      el.classList.toggle('show', visited);
+      el.classList.toggle('current', current);
+    });
+    g.querySelectorAll('.seg').forEach(function (el) {
+      var t = el.getAttribute('data-to');
+      el.classList.toggle('on', replaying && index[t] < state.step);
+    });
+
+    $('legend-idle').hidden = replaying;
+    $('legend-replay').hidden = !replaying;
+    $('replay-status').textContent = !replaying ? 'Depth-First Search · press Replay to watch it run'
+      : (state.step >= n ? 'Traversal complete · ' + n + ' topics found'
+        : 'Depth-First Search · step ' + state.step + ' of ' + n + (state.playing ? '' : ' · paused'));
+    $('replay-label').textContent = replaying ? 'Replay again' : 'Replay traversal';
+    var pause = $('pause-btn');
+    pause.setAttribute('aria-label', state.playing ? 'Pause replay' : 'Play replay');
+    pause.innerHTML = state.playing
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5 V19"/><path d="M15 5 V19"/></svg>'
+      : '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5 L19 12 L7 19.5 Z"/></svg>';
+    renderDetail(sel);
+  }
+
+  function renderDetail(t) {
+    var id = state.elective, e = CONTENT.electives[id], tp = topic(t), s = subject(tp.subject), st = status(t);
+    var why = (e.why && e.why[t]) || ['', ''];
+    var kind = strengthOf(id, t);
+    $('detail-title').textContent = tp.label;
+    $('detail-kind').textContent = kind === 'essential' ? 'Essential' : 'Helpful';
+    $('detail-kind').className = 'kind kind-' + kind;
+    $('detail-why').textContent = why[0] || 'Explanation coming soon.';
+    $('detail-used').textContent = why[1] || '—';
+    var kids = childrenOf(id, t).map(function (c) { return topic(c).label; });
+    $('detail-builds').textContent = kids.length ? kids.join(', ') : 'Nothing further — a starting point';
+    var dd = $('detail-status');
+    var rating = state.done[tp.subject];
+    if (st === 'covered') { dd.textContent = 'Covered in ' + s.name + (s.semester ? ', Semester ' + s.semester : '') + (rating === 'strong' ? ' — you rated it strong' : ''); dd.style.color = ''; }
+    else if (st === 'revise') { dd.textContent = rating === 'weak' ? 'You rated ' + s.name + ' as weak — revise this first' : 'Met only briefly in ' + s.name + ' — worth revising'; dd.style.color = 'var(--warn)'; }
+    else { dd.textContent = s.name + (s.tickable ? ' is not ticked as completed' : ' is outside your curriculum'); dd.style.color = 'var(--warn)'; }
+  }
+
+  /* ---------- List and study order ---------- */
+  function tagFor(st) {
+    if (st === 'covered') return '<span class="tag tag-covered">Covered</span>';
+    if (st === 'revise') return '<span class="tag tag-revise">Revise</span>';
+    return '<span class="tag tag-new">New to you</span>';
+  }
+  function renderList() {
+    var id = state.elective, list = topicsOf(id);
+    if (!list.length) { $('list-grid').innerHTML = '<div class="graph-empty" style="grid-column:1/-1"><b>No significant prerequisites</b>Anyone can take this course.</div>'; return; }
+    var order = Object.keys(CONTENT.subjects);
+    var html = order.map(function (sid) {
+      var ts = list.filter(function (t) { return topic(t).subject === sid; });
+      if (!ts.length) return '';
+      var s = subject(sid);
+      return '<div class="card list-card"><h3><span>' + esc(s.name) + ' · ' + (s.semester ? 'Semester ' + s.semester : (s.tickable ? 'not studied yet' : 'outside your curriculum')) + '</span><span style="font-family:var(--mono)">' + ts.length + '</span></h3>' +
+        ts.map(function (t) {
+          var kind = strengthOf(id, t);
+          return '<div class="list-row"><span>' + esc(topic(t).label) + '</span><span class="kind kind-' + kind + '">' + (kind === 'essential' ? 'Essential' : 'Helpful') + '</span>' + tagFor(status(t)) + '</div>';
+        }).join('') + '</div>';
+    }).join('');
+    $('list-grid').innerHTML = html;
+  }
+  function renderOrder() {
+    var r = result(state.elective);
+    if (!r || !r.finish.length) { $('order-list').innerHTML = '<li>Nothing to study first — no prerequisites.</li>'; return; }
+    $('order-list').innerHTML = r.finish.map(function (t, i) {
+      return '<li><span class="n">' + (i < 9 ? '0' : '') + (i + 1) + '</span><span class="t"><span>' + esc(topic(t).label) + '</span><small>' + esc(subjectLine(t)) + '</small></span>' + tagFor(status(t)) + '</li>';
+    }).join('');
+  }
+
+  /* ---------- Replay ---------- */
+  function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+  function total() { var r = result(state.elective); return r ? r.visit.length : 0; }
+  function reducedMotion() {
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) { return false; }
+  }
+  function advance() {
+    var n = total(), s = (state.step === null ? 0 : state.step) + 1;
+    if (s >= n) { stopTimer(); state.step = n; state.playing = false; }
+    else { state.step = s; }
+    paintGraph();
+  }
+  function startReplay() {
+    var n = total();
+    stopTimer();
+    if (!n) return;
+    if (state.tab !== 'graph') { state.tab = 'graph'; renderTabs(); }
+    if (reducedMotion()) { state.step = n; state.playing = false; paintGraph(); return; }
+    state.step = 0; state.playing = true;
+    paintGraph();
+    timer = setInterval(advance, STEP_MS);
+  }
+  function togglePause() {
+    var n = total();
+    if (state.playing) { stopTimer(); state.playing = false; paintGraph(); return; }
+    if (state.step !== null && state.step < n) { state.playing = true; timer = setInterval(advance, STEP_MS); paintGraph(); return; }
+    startReplay();
+  }
+  function skip() { stopTimer(); state.step = total(); state.playing = false; paintGraph(); }
+
+  /* ---------- Render everything for the selected elective ---------- */
+  function selectElective(id) {
+    stopTimer();
+    state.elective = id; state.step = null; state.playing = false; state.selected = null;
+    renderAll();
+  }
+  function renderAll() {
+    renderSidebar();
+    renderCourse();
+    renderTabs();
+    buildGraph();
+    paintGraph();
+    renderList();
+    renderOrder();
+  }
+
+  /* ---------- Electives or About ---------- */
+  function showView() {
+    var about = window.location.hash === '#about';
+    if (about) { stopTimer(); state.playing = false; state.step = null; }
+    document.querySelector('.layout').hidden = about;
+    $('about-view').hidden = !about;
+    if (about) $('nav-about').setAttribute('aria-current', 'page'); else $('nav-about').removeAttribute('aria-current');
+    if (!about) $('nav-electives').setAttribute('aria-current', 'page'); else $('nav-electives').removeAttribute('aria-current');
+    if (!about) paintGraph();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- Events ---------- */
+  function wire() {
+    window.addEventListener('hashchange', showView);
+    $('clear-btn').addEventListener('click', function () {
+      try { window.localStorage.removeItem(STORE_KEY); window.localStorage.removeItem(OLD_STORE_KEY); } catch (err) { /* ignore */ }
+      state.done = {};
+      stopTimer(); state.step = null; state.playing = false;
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      showView();
+      renderWelcome(); renderAll(); showScreen('welcome');
+    });
+    $('subjects-form').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var d = {};
+      $('subject-groups').querySelectorAll('.subject-row').forEach(function (row) {
+        var sid = row.getAttribute('data-sid');
+        if (!row.querySelector('input[type="checkbox"]').checked) return;
+        var picked = row.querySelector('input[type="radio"]:checked');
+        d[sid] = picked ? picked.value : 'okay';
+      });
+      if (!Object.keys(d).length) { $('form-note').hidden = false; return; }
+      $('form-note').hidden = true;
+      state.done = d;
+      saveDone();
+      renderAll();
+      if (window.location.hash === '#about') history.replaceState(null, '', '#electives');
+      showView();
+      showScreen('dashboard');
+    });
+    $('subject-groups').addEventListener('change', function (ev) {
+      if (ev.target.type !== 'checkbox') return;
+      setRow(ev.target.closest('.subject-row'), ev.target.checked);
+      if (ev.target.checked) $('form-note').hidden = true;
+    });
+    $('quick-btn').addEventListener('click', function () {
+      $('subject-groups').querySelectorAll('.subject-row').forEach(function (row) {
+        if (CONTENT.defaultDone.indexOf(row.getAttribute('data-sid')) >= 0) setRow(row, true);
+      });
+      $('form-note').hidden = true;
+    });
+    $('untick-btn').addEventListener('click', function () {
+      $('subject-groups').querySelectorAll('.subject-row').forEach(function (row) { setRow(row, false); });
+    });
+    var back = function () { stopTimer(); state.step = null; state.playing = false; renderWelcome(); showScreen('welcome'); };
+    $('edit-btn').addEventListener('click', back);
+    $('home-btn').addEventListener('click', back);
+
+    var onList = function (ev) {
+      var b = ev.target.closest('[data-el]');
+      if (b) selectElective(b.getAttribute('data-el'));
+    };
+    $('program-list').addEventListener('click', onList);
+    $('open-list').addEventListener('click', onList);
+    $('more-btn').addEventListener('click', function () { state.showAllOpen = !state.showAllOpen; renderSidebar(); });
+    $('search').addEventListener('input', function (ev) { state.query = ev.target.value; renderSidebar(); });
+
+    ['graph', 'list', 'order'].forEach(function (t) {
+      $('tab-' + t).addEventListener('click', function () { state.tab = t; renderTabs(); });
+    });
+    $('replay-btn').addEventListener('click', startReplay);
+    $('pause-btn').addEventListener('click', togglePause);
+    $('skip-btn').addEventListener('click', skip);
+    $('graph').addEventListener('click', function (ev) {
+      if (ev.target.closest('#root-node')) { startReplay(); return; }
+      var node = ev.target.closest('.node');
+      if (node) { state.selected = node.getAttribute('data-topic'); paintGraph(); }
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === '/' && document.activeElement && document.activeElement.tagName !== 'INPUT' && !$('dashboard').hidden) {
+        ev.preventDefault(); $('search').focus();
+      }
+    });
+  }
+
+  /* ---------- Start ---------- */
+  function start() {
+    if (!CONTENT) { document.body.innerHTML = '<p style="padding:40px;color:#F2B55A">data/content.js is missing.</p>'; return; }
+    var loaded = loadDone();
+    state.done = loaded.done;
+    try { if (window.matchMedia('(max-width: 760px)').matches) state.tab = 'list'; } catch (err) { /* keep graph */ }
+    wire();
+    var alert = $('data-alert');
+    if (!RESULTS) {
+      alert.hidden = false;
+      alert.textContent = 'data/results.js is missing. Run the C program to generate it from data/edges.txt.';
+    } else if (RESULTS.cycle) {
+      alert.hidden = false;
+      alert.textContent = 'The C program found a cycle in the prerequisite data: ' + RESULTS.cycle.join(' → ') + '. Fix edges.txt and run it again.';
+    }
+    renderWelcome();
+    renderAll();
+    showView();
+    showScreen(loaded.saved ? 'dashboard' : 'welcome');
+  }
+  start();
+})();
+</script>
+</body>
+</html>
