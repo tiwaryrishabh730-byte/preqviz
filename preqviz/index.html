@@ -123,6 +123,16 @@ button { font: inherit; color: inherit; }
 .link-btn { background: none; border: 0; padding: 8px 16px; color: #B7BEFF; font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; }
 .link-btn:hover { color: #D9DDFF; }
 .empty-search { padding: 12px 16px; font-size: 13px; color: var(--text-3); }
+.rec { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; background: rgba(139, 151, 255, 0.07); border: 1px solid rgba(139, 151, 255, 0.35); }
+.rec h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-text); }
+.rec-item { display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 10px 12px; border-radius: 12px; text-align: left; cursor: pointer; background: var(--inset); border: 1px solid var(--border); transition: border-color .2s; }
+.rec-item:hover { border-color: var(--accent); }
+.rec-kind { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.rec-name { font-size: 14px; font-weight: 600; }
+.rec-meta { font-size: 12px; color: var(--accent-text); }
+.rec-note { margin: 0; font-size: 12px; color: var(--text-3); }
+.tag-best { align-self: flex-start; background: var(--accent); color: var(--accent-ink); }
+.chip-best { border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 600; }
 
 .main { flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 .course { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; padding: 28px; }
@@ -311,6 +321,7 @@ button { font: inherit; color: inherit; }
 
   <div class="layout">
     <aside class="sidebar" aria-label="Electives">
+      <section class="rec" id="rec-box" aria-labelledby="rec-title"></section>
       <div style="display:flex;flex-direction:column;gap:8px">
         <div class="side-head"><h2>Program electives</h2><span id="program-count"></span></div>
         <div class="side-list" id="program-list"></div>
@@ -448,6 +459,7 @@ button { font: inherit; color: inherit; }
           <li>Program electives: the official syllabi for Academic Year 2026–27.</li>
           <li>Open electives: the even-semester catalogue. Detailed syllabi are released after selection, so these are estimates.</li>
           <li>Maps have not yet been reviewed by faculty. Use them as a guide, not a rule.</li>
+          <li>Recommendations rank electives by readiness: Essential topics count double Helpful ones, and a topic to revise earns half credit. Only electives that build on at least one Essential topic are ranked.</li>
         </ul>
         <h2 class="about-h2" style="margin:8px 0 0">Your data</h2>
         <p style="margin:0;color:var(--text-2)">No account. The subjects you tick are saved only in this browser.</p>
@@ -455,7 +467,7 @@ button { font: inherit; color: inherit; }
       </div>
     </div>
 
-    <p class="footnote">Built by Rohan, Bachelor of Technology, Artificial Intelligence, NMIMS MPSTME, as a Data Structures and Algorithms mini project. Spotted a mistake in a map? Tell the maintainer.</p>
+    <p class="footnote">Built by Shubhayu Mukherjee, Paras Sawla and Rishabh Tiwary, Bachelor of Technology, Artificial Intelligence, NMIMS MPSTME, as a Data Structures and Algorithms mini project. Spotted a mistake in a map? Tell the maintainer.</p>
   </section>
 </div>
 
@@ -600,17 +612,64 @@ button { font: inherit; color: inherit; }
     if (e.name.toLowerCase().indexOf(q) >= 0 || e.dept.toLowerCase().indexOf(q) >= 0) return true;
     return topicsOf(id).some(function (t) { return topic(t).label.toLowerCase().indexOf(q) >= 0; });
   }
+  /* ---------- Recommendation (ranks electives by weighted readiness) ----------
+     Each prerequisite topic counts 2 if Essential, 1 if Helpful.
+     Ready = full credit, Revise = half, New to you = none.
+     Match % = credit earned / credit possible. Only electives with at least
+     one Essential prerequisite compete: ones that assume nothing would score
+     100% without building on anything the student has studied. */
+  function matchScore(id) {
+    var list = topicsOf(id), possible = 0, earned = 0;
+    list.forEach(function (t) {
+      var w = strengthOf(id, t) === 'essential' ? 2 : 1, s = status(t);
+      possible += w;
+      earned += w * (s === 'covered' ? 1 : s === 'revise' ? 0.5 : 0);
+    });
+    return possible ? Math.round(earned / possible * 100) : null;
+  }
+  function bestOf(type) {
+    var ranked = electiveIds(type)
+      .filter(function (id) { return topicsOf(id).some(function (t) { return strengthOf(id, t) === 'essential'; }); })
+      .map(function (id) { return { id: id, score: matchScore(id), size: topicsOf(id).length, name: CONTENT.electives[id].name }; })
+      .sort(function (a, b) { return b.score - a.score || b.size - a.size || a.name.localeCompare(b.name); });
+    return ranked[0] || null;
+  }
+  function recommended() {
+    return { program: bestOf('program'), open: bestOf('open') };
+  }
+  function renderRec() {
+    var rec = recommended(), box = $('rec-box');
+    if (!rec.program && !rec.open) { box.hidden = true; return; }
+    box.hidden = state.query.trim() !== '';
+    function item(kind, r) {
+      if (!r) return '';
+      var rd = readiness(r.id);
+      return '<button type="button" class="rec-item" data-el="' + r.id + '">' +
+        '<span class="rec-kind">' + kind + '</span>' +
+        '<span class="rec-name">' + esc(CONTENT.electives[r.id].name) + '</span>' +
+        '<span class="rec-meta">' + r.score + '% match · ' + (rd.studied - rd.revise) + ' ready, ' + rd.revise + ' to revise, ' + rd.fresh + ' new</span></button>';
+    }
+    box.innerHTML = '<h2 id="rec-title">Recommended for you</h2>' +
+      item('Program elective', rec.program) + item('Open elective', rec.open) +
+      '<p class="rec-note">Ranked by how ready you are. Weigh your interests too.</p>';
+  }
+  function isBest(id) {
+    var rec = recommended();
+    return (rec.program && rec.program.id === id) || (rec.open && rec.open.id === id);
+  }
+
   function electiveButton(id) {
     var e = CONTENT.electives[id], r = readiness(id), on = id === state.elective;
     var pct = r.total ? Math.round(r.studied / r.total * 100) : 100;
     var frac = r.total ? r.studied + '/' + r.total : 'none';
+    var best = isBest(id) ? '<span class="tag tag-best">Best match</span>' : '';
     if (e.type === 'program') {
       return '<button type="button" class="el-btn" data-el="' + id + '" aria-current="' + on + '">' +
-        '<span class="el-text"><span class="el-name">' + esc(e.name) + '</span><span class="el-meta">' + e.credits + ' credits · ' + esc(e.hours) + '</span></span>' +
+        '<span class="el-text">' + best + '<span class="el-name">' + esc(e.name) + '</span><span class="el-meta">' + e.credits + ' credits · ' + esc(e.hours) + '</span></span>' +
         '<span class="el-bar"><span class="bar"><span style="width:' + pct + '%"></span></span><span class="frac">' + frac + '</span></span></button>';
     }
     return '<button type="button" class="el-btn open" data-el="' + id + '" aria-current="' + on + '">' +
-      '<span class="el-text"><span class="el-name">' + esc(e.name) + '</span><span class="el-meta">' + esc(e.dept) + (r.total ? ' · ' + frac + ' studied' : ' · no prerequisites') + '</span></span>' +
+      '<span class="el-text">' + best + '<span class="el-name">' + esc(e.name) + '</span><span class="el-meta">' + esc(e.dept) + (r.total ? ' · ' + frac + ' studied' : ' · no prerequisites') + '</span></span>' +
       '<span class="tag tag-partial">Partial</span></button>';
   }
   function renderSidebar() {
@@ -622,6 +681,7 @@ button { font: inherit; color: inherit; }
     $('open-count').textContent = open.length;
     $('program-list').innerHTML = program.length ? program.map(electiveButton).join('') : '<div class="empty-search">No program elective matches.</div>';
     $('open-list').innerHTML = shownOpen.length ? shownOpen.map(electiveButton).join('') : '<div class="empty-search">No open elective matches.</div>';
+    renderRec();
     var more = $('more-btn');
     more.hidden = searching || open.length <= 4;
     more.textContent = state.showAllOpen ? 'Show fewer open electives' : 'Show ' + (open.length - 4) + ' more open electives';
@@ -634,7 +694,8 @@ button { font: inherit; color: inherit; }
     $('course-chips').innerHTML =
       '<span class="chip chip-accent">' + (e.type === 'program' ? 'Program elective' : 'Open elective') + '</span>' +
       '<span class="chip">' + e.credits + ' credits</span><span class="chip">' + esc(e.hours) + '</span>' +
-      (e.type === 'open' ? '<span class="chip">Offered by ' + esc(e.dept) + '</span>' : '');
+      (e.type === 'open' ? '<span class="chip">Offered by ' + esc(e.dept) + '</span>' : '') +
+      (isBest(id) ? '<span class="chip chip-best">Best match for you · ' + matchScore(id) + '%</span>' : '');
     $('course-title').textContent = e.name;
     $('course-desc').textContent = e.desc;
     $('partial-notice').hidden = e.type !== 'open';
@@ -938,6 +999,7 @@ button { font: inherit; color: inherit; }
     };
     $('program-list').addEventListener('click', onList);
     $('open-list').addEventListener('click', onList);
+    $('rec-box').addEventListener('click', onList);
     $('more-btn').addEventListener('click', function () { state.showAllOpen = !state.showAllOpen; renderSidebar(); });
     $('search').addEventListener('input', function (ev) { state.query = ev.target.value; renderSidebar(); });
 
